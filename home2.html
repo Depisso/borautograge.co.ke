@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BORAUTO GARAGE – Nairobi’s Premier Auto Service</title>
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #111;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    header {
+      background: rgba(0, 0, 0, 0.8);
+      border-bottom: 3px solid #ffa500;
+      padding: 20px 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      color: #ffa500;
+    }
+
+    header p {
+      font-size: 1.15rem;
+    }
+
+    nav {
+      background: #222;
+      position: sticky;
+      top: 0;
+      padding: 15px;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    nav a {
+      color: #fff;
+      margin: 0 15px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #ffa500;
+    }
+
+    .hero {
+      background: url('darkgarage.jpg') no-repeat center/cover;
+      height: 450px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .hero h2 {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      font-size: 2.5rem;
+      border: 2px solid #fff;
+      border-radius: 5px;
+    }
+
+    #greeting {
+      margin-top: 15px;
+      font-size: 1.8rem;
+      color: #ffa500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Call Now Button -->
+  <a href="tel:+254722738797" class="call-button">
+    📞 Call Now
+  </a>
+
+  <header>
+    <h1>BORAUTO GARAGE</h1>
+    <p>Located in Kariokor, Nairobi</p>
+  </header>
+
+<nav> 
+  <a href="aboutus.html">About Us</a>
+  <a href="services.html">Services</a>
+  <a href="contact.html">Contact</a>
+  <a href="knowledge.html">Knowledge</a>
+  <a href="dashboard.html">Dashboard</a>
+</nav>
+
+  <div class="hero">
+    <h2>Expert Car Care | Trusted by Nairobi</h2>
+    <h2 id="greeting">Welcome!</h2>
+  </div>
+
+  <!-- The rest of your page remains unchanged -->
+
+  <footer>
+    &copy; 2025 BORAUTO GARAGE. All rights reserved.
+  </footer>
+
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+  <script>
+    const swiper = new Swiper('.swiper', {
+      slidesPerView: 5,
+      spaceBetween: 20,
+      loop: true,
+      autoplay: {
+        delay: 2500,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      breakpoints: {
+        0: { slidesPerView: 2 },
+        600: { slidesPerView: 3 },
+        900: { slidesPerView: 5 },
+      },
+    });
+
+    // Fetch user session info and greet
+    fetch('/api/me', { credentials:'include' })
+      .then(r=>r.json())
+      .then(d=>{
+        if(d.authenticated){
+          document.getElementById('greeting').textContent = `Welcome, ${d.user.username}!`;
+        } else {
+          location.href = 'login.html';
+        }
+      });
+  </script>
+</body>
+</html>

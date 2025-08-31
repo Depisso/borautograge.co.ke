@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Car Maintenance - Borauto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #ffffff;
+      margin: 0;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .header {
+      background-color: #7b001c;
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 36px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .section {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .section img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      object-fit: cover;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .section-content {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .section h2 {
+      color: #d00027;
+      margin-top: 0;
+    }
+
+    .section ul {
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+
+    .section ul li {
+      margin-bottom: 10px;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #7b001c;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #a8002d;
+    }
+
+    .up-float-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background-color: #000;
+      color: #FFD700;
+      font-size: 30px;
+      text-align: center;
+      line-height: 60px;
+      border-radius: 50%;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .up-float-btn:hover {
+      transform: scale(1.1);
+      background-color: #111;
+    }
+
+    @media (max-width: 768px) {
+      .section {
+        flex-direction: column;
+      }
+
+      .section img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .header h1 {
+        font-size: 28px;
+      }
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Car Maintenance Guide</h1>
+  </div>
+
+  <div class="container">
+
+    <div class="section">
+      <img src="images/oil-check.jpg" alt="Oil Maintenance">
+      <div class="section-content">
+        <h2>Oil & Fluid Maintenance</h2>
+        <ul>
+          <li>Change engine oil every 5,000–10,000 km.</li>
+          <li>Monitor brake fluid, coolant, power steering, and transmission fluid.</li>
+          <li>Check for leaks under your car after parking.</li>
+          <li>Ensure oil color isn't too dark — a sign it's dirty.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/tyre-care.jpg" alt="Tire Maintenance">
+      <div class="section-content">
+        <h2>Tire Inspection & Rotation</h2>
+        <ul>
+          <li>Check tire pressure weekly and before long trips.</li>
+          <li>Rotate tires every 8,000–10,000 km for even wear.</li>
+          <li>Ensure tires have good tread depth — replace below 1.6mm.</li>
+          <li>Inspect for cracks, bulges, or embedded objects.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/battery.jpg" alt="Battery Maintenance">
+      <div class="section-content">
+        <h2>Battery Health</h2>
+        <ul>
+          <li>Clean terminals regularly to avoid corrosion.</li>
+          <li>Check voltage with a multimeter — healthy is around 12.6V.</li>
+          <li>Replace battery every 3–5 years or if frequently discharged.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/brake-system.jpg" alt="Brake Inspection">
+      <div class="section-content">
+        <h2>Brake System Check</h2>
+        <ul>
+          <li>Listen for squeaking or grinding sounds when braking.</li>
+          <li>Inspect brake pads every 20,000 km.</li>
+          <li>Top up brake fluid if low and inspect for leaks.</li>
+          <li>Replace rotors if excessively worn or warped.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/filters.jpg" alt="Filters Maintenance">
+      <div class="section-content">
+        <h2>Filters Replacement</h2>
+        <ul>
+          <li>Replace air filter every 15,000–30,000 km.</li>
+          <li>Change cabin filter annually for cleaner air inside.</li>
+          <li>Fuel filter should be replaced per manufacturer’s interval.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/spark-plugs.jpg" alt="Spark Plug Maintenance">
+      <div class="section-content">
+        <h2>Spark Plugs & Ignition</h2>
+        <ul>
+          <li>Replace spark plugs every 30,000–100,000 km depending on type.</li>
+          <li>Check for misfires or rough idling as signs of wear.</li>
+          <li>Inspect ignition coils and wires.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/ac-check.jpg" alt="AC System">
+      <div class="section-content">
+        <h2>Air Conditioning System</h2>
+        <ul>
+          <li>Run A/C regularly, even in winter, to maintain seals.</li>
+          <li>Recharge refrigerant if cooling weakens.</li>
+          <li>Replace cabin filter to ensure proper airflow.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/belts.jpg" alt="Belts and Timing Chain">
+      <div class="section-content">
+        <h2>Belts & Timing Chain</h2>
+        <ul>
+          <li>Inspect serpentine and timing belts for cracks or frays.</li>
+          <li>Replace belts between 60,000–100,000 km as preventive care.</li>
+          <li>Listen for squealing sounds on startup or sharp turns.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/wipers.jpg" alt="Wiper Maintenance">
+      <div class="section-content">
+        <h2>Wipers & Lighting</h2>
+        <ul>
+          <li>Change wiper blades every 6–12 months.</li>
+          <li>Ensure all exterior and interior lights work — including indicators.</li>
+          <li>Clean lenses for maximum brightness at night.</li>
+        </ul>
+      </div>
+    </div>
+
+    <a href="knowledge.html" class="back-btn">← Back to Knowledge Centre</a>
+    <a href="index.html" class="back-btn" style="margin-left: 10px;">Home</a>
+    <a href="#" class="up-float-btn" title="Go to Top">&#x25B2;</a>
+
+  </div>
+</body>
+</html>

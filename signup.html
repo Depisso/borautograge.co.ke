@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Borauto Signup</title>
+  <style>
+    body {
+      margin:0; font-family: "Segoe UI", sans-serif;
+      display:flex; justify-content:center; align-items:center;
+      min-height:100vh; background: linear-gradient(135deg,#1d3557,#457b9d);
+    }
+    .container {
+      background:#fff; padding:30px; border-radius:12px;
+      width:350px; box-shadow:0 10px 25px rgba(0,0,0,0.3);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    h2 { margin-bottom:20px; color:#1d3557; text-align:center; }
+    input {
+      width:100%; padding:12px; margin:10px 0;
+      border:1px solid #ccc; border-radius:8px; font-size:15px;
+    }
+    button {
+      width:100%; padding:12px; margin-top:10px;
+      background:#e63946; border:none; color:white;
+      border-radius:8px; font-weight:bold; font-size:16px;
+      cursor:pointer; transition:background 0.3s;
+    }
+    button:hover { background:#c92c3c; }
+    .error { color:#e63946; font-size:13px; margin-top:5px; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:none;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Account</h2>
+    <form id="signupForm" novalidate>
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" minlength="6" required>
+      <div id="error" class="error"></div>
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('signupForm');
+    const errorDiv = document.getElementById('error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorDiv.textContent = "";
+
+      const username = form.username.value.trim();
+      const email = form.email.value.trim();
+      const password = form.password.value;
+
+      if(!username || !email || !password){
+        errorDiv.textContent = "All fields are required.";
+        return;
+      }
+      if(password.length < 6){
+        errorDiv.textContent = "Password must be at least 6 characters.";
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:3000/api/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password })
+        });
+        const data = await res.json();
+
+        if(data.success){
+          alert("Account created successfully!");
+          window.location.href = "home.html";
+        } else {
+          errorDiv.textContent = data.message || "Signup failed.";
+        }
+      } catch (err) {
+        errorDiv.textContent = "Server unreachable.";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BORAUTO — Unified Bookings Dashboard</title>
+  <meta name="description" content="Responsive Borauto admin with receipts, sharing, ingestion, and smooth cross-device sync."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
+
+  <!-- html2canvas for generating PNG receipts (no server needed) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- EmailJS (optional) for emailing the PNG as attachment -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+
+<body>
+  <div class="app" aria-label="Application">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar" aria-label="Primary">
+      <div class="brand">
+        <img src="borauto-logo.png" alt="Borauto Logo" width="30" height="30"/>
+        <div>
+          <div class="name">BORAUTO</div>
+          <div class="sub">Unified Dashboard</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <a href="#" class="active" data-page="overview">Overview</a>
+        <a href="#" data-page="bookings">Bookings</a>
+        <a href="#" data-page="services">Services</a>
+        <a href="#" data-page="profile">Profile</a>
+        <a href="#" data-page="sync">Sync & Ingest</a>
+        <a href="#" data-page="settings">Settings</a>
+      </nav>
+
+      <div class="foot">
+        Logged in as <strong id="whoami">Admin</strong>
+        <div class="foot-actions">
+          <button class="btn ghost" id="btnSignOut">Sign out</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main" id="main" aria-live="polite">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="l">
+          <button class="btn ghost" id="menuToggle" aria-label="Toggle menu">☰</button>
+          <div class="search">
+            <input id="searchBox" placeholder="Search bookings, vehicles, clients…" aria-label="Search"/>
+          </div>
+        </div>
+        <div class="r">
+          <div class="hello">
+            <div id="greeting">Hello</div>
+            <div class="muted" id="geo">Nairobi, Kenya</div>
+          </div>
+          <div class="avatar" id="avatar"><span id="avatarInitials">BR</span></div>
+        </div>
+      </div>
+
+      <!-- Pages -->
+      <section id="pages" class="pages">
+        <!-- Overview -->
+        <div class="page" id="overview">
+          <div class="grid">
+            <div class="card col-3">
+              <h4>Total Bookings</h4>
+              <div id="statBookings" class="big">0</div>
+            </div>
+            <div class="card col-3">
+              <h4>Pending</h4>
+              <div id="statPending" class="big">0</div>
+            </div>
+            <div class="card col-3">
+              <h4>Active Services</h4>
+              <div id="statServices" class="big">0</div>
+            </div>
+            <div class="card col-3">
+              <h4>Revenue (KSh)</h4>
+              <div id="statRevenue" class="big" title="Double-click to show/hide">******</div>
+            </div>
+
+            <div class="card col-6">
+              <h4>Recent Bookings</h4>
+              <div class="tablewrap">
+                <table id="tblRecent" class="table">
+                  <thead><tr><th>ID</th><th>Client</th><th>Vehicle</th><th>Date</th><th>Time</th><th>Phone</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="muted tip">Tip: click a row to open it in Bookings.</div>
+            </div>
+
+            <div class="card col-6">
+              <h4>Quick Actions</h4>
+              <div class="actions">
+                <button class="btn" id="qaAddBooking">+ Add Booking</button>
+                <button class="btn ghost" id="qaAddService">+ Add Service</button>
+                <button class="btn ghost" id="qaEditProfile">Edit Profile</button>
+                <button class="btn ghost" id="qaExportCSV">Export CSV</button>
+                <button class="btn ghost" id="qaImportJSON">Import JSON</button>
+                <button class="btn danger" id="qaClearAll">Clear All</button>
+              </div>
+            </div>
+
+            <div class="card col-12">
+              <h4>All Bookings</h4>
+              <div class="tablewrap">
+                <table id="tblBookingsOverview" class="table">
+                  <thead>
+                    <tr><th>ID</th><th>Client</th><th>Vehicle</th><th>Date</th><th>Time</th><th>Service(s)</th><th>Price</th><th>Status</th><th>Phone</th></tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookings -->
+        <div class="page" id="bookings" hidden>
+          <div class="card">
+            <div class="cardbar">
+              <h4>Bookings</h4>
+              <div class="actions">
+                <button class="btn ghost" id="bkAdd">+ Add booking</button>
+                <button class="btn ghost" id="bkExportCSV">Export CSV</button>
+              </div>
+            </div>
+            <div class="tablewrap">
+              <table id="tblBookings" class="table">
+                <thead>
+                  <tr><th>ID</th><th>Client</th><th>Vehicle</th><th>Date</th><th>Time</th><th>Service(s)</th><th>Price</th><th>Status</th><th>Phone</th><th>Actions</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Services -->
+        <div class="page" id="services" hidden>
+          <div class="card">
+            <div class="cardbar">
+              <h4>Services & Prices</h4>
+              <div class="actions"><button class="btn" id="srvAdd">+ Add Service</button></div>
+            </div>
+            <div id="serviceList"></div>
+          </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="page" id="profile" hidden>
+          <div class="grid">
+            <div class="card col-6">
+              <h4>Admin Profile</h4>
+              <div id="profileBox" class="mt8"></div>
+            </div>
+            <div class="card col-6">
+              <h4>Actions</h4>
+              <div class="actions">
+                <button class="btn" id="pfEdit">Edit Profile</button>
+                <button class="btn ghost" id="pfExport">Export Data</button>
+                <button class="btn ghost" id="pfImport">Import Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sync & Ingestion -->
+        <div class="page" id="sync" hidden>
+          <div class="grid">
+            <div class="card col-6">
+              <h4>Live Feed</h4>
+              <div id="feed" class="feed"></div>
+            </div>
+            <div class="card col-6">
+              <h4>Ingestion Endpoints</h4>
+              <div class="ingest">
+                <p class="muted">From another page/site you can send bookings here in three ways:</p>
+                <ol>
+                  <li><b>URL params</b> (redirect or open):  
+                    <code>?ingest=booking&client=Jane%20Doe&vehicle=KAA123A&date=2025-12-01&time=10:00&services=Full%20Vehicle%20Servicing,Wheel%20Alignment%20Services&price=9500&phone=%2B254700000000&status=confirmed</code>
+                  </li>
+                  <li><b>postMessage</b> (same origin):  
+                    <code>window.opener.postMessage({type:'BORAUTO_ADD_BOOKING', payload:{ client:'Jane', vehicleReg:'KAA123A', date:'2025-12-01', time:'10:00', services:['Full Vehicle Servicing'], price:8000, status:'confirmed' }}, location.origin)</code>
+                  </li>
+                  <li><b>Cloud sync</b> (cross-device): enable Firebase or WebSocket below; other devices/pages writing to the same room will appear here instantly.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="card col-12">
+              <h4>Sync Mode</h4>
+              <div class="syncform">
+                <label>Mode
+                  <select id="syncMode">
+                    <option value="local">Local (offline)</option>
+                    <option value="firebase">Firebase Firestore (cross-device)</option>
+                    <option value="ws">WebSocket (bring your own server)</option>
+                  </select>
+                </label>
+
+                <fieldset id="fbFields">
+                  <legend>Firebase Config (leave empty to skip)</legend>
+                  <input id="fb_apiKey" placeholder="apiKey"/>
+                  <input id="fb_authDomain" placeholder="authDomain"/>
+                  <input id="fb_projectId" placeholder="projectId"/>
+                  <input id="fb_appId" placeholder="appId"/>
+                  <input id="fb_room" placeholder="Room (e.g. borauto-prod)"/>
+                </fieldset>
+
+                <fieldset id="wsFields">
+                  <legend>WebSocket</legend>
+                  <input id="ws_url" placeholder="wss://your-server.example/ws"/>
+                  <input id="ws_room" placeholder="Room (e.g. borauto-demo)"/>
+                </fieldset>
+
+                <div class="actions">
+                  <button class="btn" id="syncSave">Save & Connect</button>
+                  <button class="btn ghost" id="syncDisconnect">Disconnect</button>
+                </div>
+
+                <p class="muted sm">
+                  Notes: Firebase adapter uses a single document (last-write-wins) for simplicity. WS adapter publishes patches to all peers in the room. Both fall back safely to local mode if unavailable.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="page" id="settings" hidden>
+          <div class="card">
+            <h4>Settings</h4>
+            <div class="muted mb8">Configure EmailJS to send receipt PNG to a chosen email.</div>
+            <div class="settingsgrid">
+              <input id="st_emailjs_public" placeholder="EmailJS Public Key (e.g. _public_xxx)"/>
+              <input id="st_emailjs_service" placeholder="EmailJS Service ID (e.g. service_xxx)"/>
+              <input id="st_emailjs_template" placeholder="EmailJS Template ID (e.g. template_xxx)"/>
+              <input id="st_email_to" placeholder="Default recipient email (e.g. iconme25@gmail.com)"/>
+              <button class="btn" id="btnSaveEmailJS">Save EmailJS</button>
+              <div class="muted sm">Template must accept: <code>to_email</code>, <code>subject</code>, <code>message</code>, <code>attachment</code> (base64 PNG).</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- UI root for modals & toasts -->
+  <div id="uiRoot" aria-live="polite" aria-atomic="true"></div>
+<style>
+:root{
+  --bg:#081225; --card:#0e1828; --muted:#9fb0c9; --accent:#ef4444;
+  --glass:rgba(255,255,255,.05); --radius:12px; --gap:14px;
+  --shadow:0 6px 18px rgba(2,6,23,.55);
+  --font:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:linear-gradient(180deg,#061226,#081225);color:#e8f0ff;font-family:var(--font)}
+button,input,select,textarea{font-family:inherit}
+
+.app{display:flex;min-height:100vh;isolation:isolate}
+
+/* Sidebar */
+.sidebar{width:268px;padding:18px;border-right:1px solid rgba(255,255,255,.06);
+  background:linear-gradient(180deg,rgba(255,255,255,.03),transparent);position:relative}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.brand img{width:30px;height:30px;object-fit:contain;border-radius:6px}
+.brand .name{font-weight:800;letter-spacing:.4px}
+.brand .sub{font-size:12px;color:var(--muted)}
+.nav a{display:block;padding:10px;border-radius:10px;color:#cfe1ff;text-decoration:none;margin:6px 0;font-size:14px;transition:background .2s ease, color .2s ease}
+.nav a.active,.nav a:hover{background:var(--glass);color:#fff}
+.sidebar .foot{font-size:12px;color:var(--muted);margin-top:14px}
+.foot-actions{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;padding:18px;gap:16px;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.topbar .l{display:flex;align-items:center;gap:10px;min-width:0}
+.search{flex:1;background:var(--card);padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.07);min-width:220px}
+.search input{width:100%;background:transparent;border:0;color:#e8f0ff;outline:none}
+.r{display:flex;align-items:center;gap:10px}
+.hello{line-height:1}
+#greeting{font-weight:800}
+.avatar{width:44px;height:44px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:grid;place-items:center;font-weight:800}
+.avatar img{width:100%;height:100%;object-fit:cover}
+
+.pages{display:flex;flex-direction:column;gap:14px}
+.page[hidden]{display:none !important}
+
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{background:var(--card);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,.06);box-shadow:var(--shadow)}
+.col-3{grid-column:span 3}.col-6{grid-column:span 6}.col-12{grid-column:span 12}
+.big{font-size:26px;font-weight:800}
+.tablewrap{overflow:auto;margin-top:6px}
+.table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{padding:8px;text-align:left;font-size:13px}
+th{color:#b9c6db}
+tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+.badge{padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.06);font-size:12px}
+.muted{color:var(--muted)} .sm{font-size:12px} .mb8{margin-bottom:8px} .mt8{margin-top:8px}
+.tip{margin-top:6px;font-size:12px}
+.cardbar{display:flex;justify-content:space-between;align-items:center}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.settingsgrid{display:grid;gap:8px;max-width:520px}
+.syncform{display:grid;gap:10px;max-width:720px}
+.ingest code{display:block;background:rgba(255,255,255,.06);padding:8px;border-radius:8px;overflow:auto;font-size:12px;margin:6px 0}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:linear-gradient(90deg,var(--accent),#f97316);color:#fff;cursor:pointer;transition:transform .08s ease, filter .12s ease}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent}
+.btn.danger{background:#b91c1c;border-color:#b91c1c}
+input,select,textarea{background:transparent;border:1px solid rgba(255,255,255,.12);padding:9px;border-radius:8px;color:#e8f0ff;width:100%}
+input::placeholder{color:#93a4c2}
+
+/* Modal & toast */
+#uiRoot{position:fixed;inset:0;pointer-events:none;z-index:9999}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;pointer-events:auto;padding:18px}
+.modal{width:100%;max-width:980px;background:linear-gradient(180deg,#081529,#0a1732);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,.07);box-shadow:var(--shadow)}
+.toast{position:fixed;right:18px;bottom:18px;background:#081529;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.08);pointer-events:auto}
+
+/* Receipt preview (white background for clean PNG) */
+.receipt{background:#fff;color:#0b1220;padding:16px;border-radius:12px;max-width:720px;margin:0 auto}
+.receipt-header{display:flex;align-items:center;gap:10px;border-bottom:1px solid #eaeaea;padding-bottom:8px;margin-bottom:8px}
+.receipt-header img{width:36px;height:36px;object-fit:contain;border-radius:6px}
+.receipt-title{font-weight:800;letter-spacing:.4px}
+.receipt-meta{font-size:13px;color:#1f2937}
+.receipt-services{margin-top:8px}
+.empty{padding:16px;background:rgba(255,255,255,.06);border-radius:8px;color:#cbd5e1;text-align:center}
+
+/* Feed */
+.feed{display:grid;gap:8px;max-height:320px;overflow:auto}
+.feed .item{background:rgba(255,255,255,.06);padding:8px;border-radius:8px;font-size:12px}
+
+/* Responsive finesse */
+@media (max-width:1180px){
+  .grid{grid-template-columns:repeat(8,1fr)}
+  .col-3{grid-column:span 4}.col-6{grid-column:span 8}
+}
+@media (max-width:980px){
+  .sidebar{position:fixed;left:-320px;top:0;bottom:0;z-index:40;transition:left .25s ease}
+  .sidebar.open{left:0}
+  .search{display:none}
+}
+@media (max-width:640px){
+  .grid{grid-template-columns:repeat(6,1fr)}
+  .col-3,.col-6,.col-12{grid-column:span 6}
+  .hello{display:none}
+}
+</style>
+<script>
+/* ===========================================================
+   BORAUTO — Unified Dashboard
+   - Local observable store (bookings/services/profile)
+   - Fully responsive UI + modals + toasts
+   - EmailJS receipt send (optional)
+   - Receipt PNG via html2canvas (logo visible in image/print)
+   - Ingestion: URL params + postMessage
+   - Cross-tab sync: BroadcastChannel + storage event
+   - Optional cross-device sync: Firebase OR WebSocket
+   - Export/Import JSON/CSV
+   ======================================================== */
+
+(function(){
+  // ---------- Helpers ----------
+  const $  = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+  const uid = (p='id')=> p + Math.random().toString(36).slice(2,10);
+  const fmtDate = iso => iso ? new Date(iso).toLocaleDateString() : '—';
+  const todayISO = ()=>{const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10);};
+  const isPastDate = iso => {if(!iso) return false; const d=new Date(iso); d.setHours(0,0,0,0); const t=new Date(); t.setHours(0,0,0,0); return d<t;};
+  const clampStr = (s,n=64)=> (s||'').length>n ? (s.slice(0,n-1)+'…') : (s||'');
+  const downloadBlob = (filename, content, type='application/octet-stream')=>{
+    const blob = new Blob([content], {type}); const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a);
+    a.click(); a.remove(); URL.revokeObjectURL(url);
+  };
+  const phoneDefault = '+254713064230';
+
+  function showToast({msg='',timeout=2600}={}){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), timeout); }
+  function openModal({title='', content='', closable=true}){
+    $('#uiRoot').innerHTML = `<div class="modal-backdrop"><div class="modal" role="dialog" aria-modal="true"><h3 style="margin:0 0 10px 0">${title}</h3>${content}</div></div>`;
+    const back = $('#uiRoot').firstElementChild;
+    if(closable){ back.addEventListener('click', (e)=>{ if(e.target===back) $('#uiRoot').innerHTML=''; }); }
+    return { el: $('#uiRoot .modal'), close:()=>$('#uiRoot').innerHTML='' };
+  }
+
+  // ---------- Settings (EmailJS + Sync) ----------
+  const CFG_KEY = 'borauto_cfg_v1';
+  const cfg = {
+    emailjs_public: '',
+    emailjs_service: '',
+    emailjs_template: '',
+    email_to: 'iconme25@gmail.com',
+    syncMode: 'local', // local | firebase | ws
+    fb: { apiKey:'', authDomain:'', projectId:'', appId:'', room:'borauto-demo' },
+    ws: { url:'', room:'borauto-demo' }
+  };
+  try{
+    Object.assign(cfg, JSON.parse(localStorage.getItem(CFG_KEY)||'{}'));
+    cfg.fb ||= {}; cfg.ws ||= {};
+    if(cfg.emailjs_public) emailjs?.init?.(cfg.emailjs_public);
+  }catch{}
+  const saveCfg = ()=>{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); };
+
+  // ---------- Core Store ----------
+  const LS_KEY = 'borauto_state_v4';
+  const Store = {
+    state: {
+      rev: Date.now(),
+      profile: { name:'Admin', email:'admin@borauto.example', phone:'+254700000000', avatar:null },
+      services: [
+        {id:uid('srv'), name:'Engine & Gearbox Lubrication', price:4000},
+        {id:uid('srv'), name:'Suspension System Repairs', price:6500},
+        {id:uid('srv'), name:'Brake System Repair & Maintenance', price:5000},
+        {id:uid('srv'), name:'Computerized Vehicle Diagnostics', price:2500},
+        {id:uid('srv'), name:'Full Vehicle Servicing', price:8000},
+        {id:uid('srv'), name:'Battery Testing & Installation', price:2000},
+        {id:uid('srv'), name:'Tyre Replacement & Repair', price:1500},
+        {id:uid('srv'), name:'Tyre/Wheel Balancing', price:1200},
+        {id:uid('srv'), name:'Wheel Alignment Services', price:2500},
+        {id:uid('srv'), name:'Wheel Sales & Fitting', price:0},
+        {id:uid('srv'), name:'Automotive Accessories Supply', price:0},
+      ],
+      bookings: []
+    },
+    _obs:new Set(),
+    save(){ localStorage.setItem(LS_KEY, JSON.stringify(this.state)); },
+    load(){ try{ const s=localStorage.getItem(LS_KEY); if(s) this.state=JSON.parse(s);}catch{} },
+    sub(fn){ this._obs.add(fn); return ()=>this._obs.delete(fn); },
+    _emit(){ this.state.rev = Date.now(); this.save(); this._obs.forEach(fn=>fn(this.state)); publishLocal(this.state); },
+
+    updateProfile(payload){ Object.assign(this.state.profile, payload||{}); this._emit(); },
+
+    addService(name, price=0){ this.state.services.push({id:uid('srv'), name, price:Number(price)||0}); this._emit(); },
+    updateService(id, payload){ const s=this.state.services.find(x=>x.id===id); if(s){ Object.assign(s, payload); this._emit(); } },
+    deleteService(id){
+      this.state.services = this.state.services.filter(s=>s.id!==id);
+      this.state.bookings = this.state.bookings.map(b=>{
+        const filtered = (b.services||[]).filter(it=>it.serviceId!==id);
+        return {...b, services: filtered, serviceName: filtered.map(x=>x.serviceName).join(', ')};
+      });
+      this._emit();
+    },
+
+    addBooking(b){
+      const copy = {...b};
+      copy.id = copy.id || uid('bk');
+      copy.price = Number(copy.price||0);
+      copy.status = (copy.status||'confirmed').toLowerCase();
+      copy.serviceName = copy.serviceName || (copy.services||[]).map(s=>s.serviceName).join(', ');
+      this.state.bookings.push(copy); this._emit(); return copy;
+    },
+    updateBooking(id, payload){ const b=this.state.bookings.find(x=>x.id===id); if(b){ Object.assign(b, payload); this._emit(); } },
+    deleteBooking(id){ this.state.bookings = this.state.bookings.filter(b=>b.id!==id); this._emit(); },
+
+    replaceState(next){
+      if(!next || !next.rev) return;
+      if(!this.state.rev || next.rev > this.state.rev){ this.state = next; this.save(); this._obs.forEach(fn=>fn(this.state)); }
+    }
+  };
+  Store.load();
+
+  // ---------- Cross-tab local sync ----------
+  const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('borauto_room') : null;
+  function publishLocal(state){ bc?.postMessage({type:'STATE', state}); }
+  bc?.addEventListener('message', ev=>{ if(ev.data?.type==='STATE') Store.replaceState(ev.data.state); });
+  window.addEventListener('storage', (e)=>{ if(e.key===LS_KEY && e.newValue){ try{ Store.replaceState(JSON.parse(e.newValue)); }catch{} } });
+
+  // ---------- Optional cloud sync adapters ----------
+  const Sync = {
+    conn:null, mode: cfg.syncMode,
+    async connect(){
+      await this.disconnect();
+      if(this.mode==='firebase') await FirebaseAdapter.connect();
+      if(this.mode==='ws') await WSAdapter.connect();
+    },
+    async disconnect(){
+      await FirebaseAdapter.disconnect();
+      await WSAdapter.disconnect();
+      this.conn=null;
+    },
+    push(state){ FirebaseAdapter.push(state); WSAdapter.push(state); },
+    note(msg){ feed(`sync: ${msg}`); }
+  };
+
+  const FirebaseAdapter = {
+    app:null, db:null, unsub:null,
+    async connect(){
+      if(!cfg.fb?.apiKey || !cfg.fb?.projectId || !cfg.fb?.appId || !cfg.fb?.room){ Sync.note('Firebase config incomplete; staying local.'); return; }
+      try{
+        const [{initializeApp}, {getFirestore, doc, onSnapshot, setDoc, getDoc}] =
+          await Promise.all([
+            import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
+            import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
+          ]);
+
+        this.app = initializeApp({
+          apiKey: cfg.fb.apiKey, authDomain: cfg.fb.authDomain, projectId: cfg.fb.projectId, appId: cfg.fb.appId
+        });
+        this.db = getFirestore(this.app);
+        const ref = doc(this.db, 'borauto', cfg.fb.room);
+
+        const snap = await getDoc(ref);
+        if(snap.exists()){ Store.replaceState(snap.data()); }
+
+        this.unsub = onSnapshot(ref, (docSnap)=>{
+          if(docSnap.exists()){
+            const incoming = docSnap.data(); Store.replaceState(incoming);
+          }
+        });
+
+        await setDoc(ref, Store.state, {merge:false});
+        Sync.note('Firebase connected.');
+      }catch(err){ console.error(err); Sync.note('Firebase failed; staying local.'); }
+    },
+    async push(state){
+      if(!this.db) return;
+      try{
+        const {getFirestore, doc, setDoc} = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        await setDoc(doc(this.db,'borauto',cfg.fb.room), state, {merge:false});
+      }catch(err){ console.warn('fb push failed', err); }
+    },
+    async disconnect(){ try{ this.unsub?.(); }catch{} this.unsub=null; this.db=null; this.app=null; }
+  };
+
+  const WSAdapter = {
+    ws:null,
+    async connect(){
+      if(!cfg.ws?.url || !cfg.ws?.room){ Sync.note('WebSocket config incomplete; staying local.'); return; }
+      try{
+        this.ws = new WebSocket(cfg.ws.url);
+        this.ws.onopen = ()=>{ this.ws.send(JSON.stringify({type:'join', room:cfg.ws.room})); this.push(Store.state); Sync.note('WS connected.'); };
+        this.ws.onmessage = (e)=>{
+          try{
+            const msg = JSON.parse(e.data);
+            if(msg.type==='state' && msg.room===cfg.ws.room){ Store.replaceState(msg.state); }
+          }catch{}
+        };
+        this.ws.onclose = ()=> Sync.note('WS disconnected.');
+        this.ws.onerror = ()=> Sync.note('WS error.');
+      }catch(err){ console.error(err); Sync.note('WS failed; staying local.'); }
+    },
+    push(state){ try{ this.ws?.readyState===1 && this.ws.send(JSON.stringify({type:'state', room:cfg.ws.room, state})); }catch{} },
+    async disconnect(){ try{ this.ws?.close(); }catch{} this.ws=null; }
+  };
+
+  // ---------- Settings handlers ----------
+  function preloadSettingsInputs(){
+    $('#st_emailjs_public').value = cfg.emailjs_public || '';
+    $('#st_emailjs_service').value = cfg.emailjs_service || '';
+    $('#st_emailjs_template').value = cfg.emailjs_template || '';
+    $('#st_email_to').value = cfg.email_to || '';
+  }
+  function saveEmailJS(){
+    cfg.emailjs_public = $('#st_emailjs_public').value.trim();
+    cfg.emailjs_service = $('#st_emailjs_service').value.trim();
+    cfg.emailjs_template = $('#st_emailjs_template').value.trim();
+    cfg.email_to = $('#st_email_to').value.trim() || 'iconme25@gmail.com';
+    localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+    if(cfg.emailjs_public) emailjs?.init?.(cfg.emailjs_public);
+    showToast({msg:'EmailJS settings saved'});
+  }
+
+  // ---------- Navigation & greeting ----------
+  function goTo(page){
+    $$('#pages .page').forEach(p=> p.hidden = (p.id!==page));
+    $$('#nav a').forEach(a=> a.classList.toggle('active', a.dataset.page===page));
+    if(innerWidth<980) $('#sidebar').classList.remove('open');
+    if(page==='settings') preloadSettingsInputs();
+    if(page==='sync') hydrateSyncForm();
+  }
+  $$('#nav a').forEach(a=> a.addEventListener('click', (e)=>{e.preventDefault(); goTo(a.dataset.page);} ));
+  $('#menuToggle').addEventListener('click', ()=> $('#sidebar').classList.toggle('open'));
+  (function greet(){ const h=new Date().getHours(); $('#greeting').textContent = h<12?'Good morning':h<17?'Good afternoon':'Good evening'; })();
+
+  // ---------- Renderers ----------
+  const R = {};
+  let revenueShown = false;
+  $('#statRevenue').addEventListener('dblclick', ()=>{ revenueShown = !revenueShown; R.stats(); });
+
+  R.stats = function(){
+    const {bookings, services} = Store.state;
+    $('#statBookings').textContent = String(bookings.length);
+    $('#statPending').textContent = String(bookings.filter(b=> (b.status||'').toLowerCase()==='pending').length);
+    $('#statServices').textContent = String(services.length);
+    const revenue = bookings.reduce((s,b)=> s + (Number(b.price)||0), 0);
+    $('#statRevenue').textContent = revenueShown ? revenue.toLocaleString() : '******';
+  };
+
+  function highlightBooking(id){
+    setTimeout(()=>{
+      $$('#tblBookings tbody tr').forEach(row=>{
+        if(row.firstChild && row.firstChild.textContent===id){
+          row.style.outline='2px solid #f97316'; setTimeout(()=> row.style.outline='none', 1300);
+        }
+      });
+    },50);
+  }
+
+  R.recent = function(){
+    const tbody = $('#tblRecent tbody'); tbody.innerHTML='';
+    const rows = Store.state.bookings.slice().sort((a,b)=> new Date(b.date) - new Date(a.date)).slice(0,6);
+    if(rows.length===0){ tbody.innerHTML = `<tr><td colspan="6"><div class="empty">No recent bookings</div></td></tr>`; return; }
+    rows.forEach(b=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${b.id}</td><td>${clampStr(b.client,22)||'—'}</td><td>${b.vehicleReg||'—'}</td><td>${fmtDate(b.date)}</td><td>${b.time||'—'}</td><td>${b.phone||'—'}</td>`;
+      tr.style.cursor='pointer';
+      tr.onclick = ()=>{ goTo('bookings'); highlightBooking(b.id); };
+      tbody.appendChild(tr);
+    });
+  };
+
+  R.overviewTable = function(){
+    const tbody = $('#tblBookingsOverview tbody'); tbody.innerHTML='';
+    if(Store.state.bookings.length===0){ tbody.innerHTML = `<tr><td colspan="9"><div class="empty">No bookings yet</div></td></tr>`; return; }
+    Store.state.bookings.slice().sort((a,b)=> new Date(a.date)-new Date(b.date)).forEach(b=>{
+      const tr=document.createElement('tr');
+      tr.style.cursor='pointer';
+      tr.onclick = ()=>{ goTo('bookings'); highlightBooking(b.id); };
+      tr.innerHTML = `<td>${b.id}</td><td>${clampStr(b.client,22)||'—'}</td><td>${b.vehicleReg||'—'}</td><td>${fmtDate(b.date)}</td><td>${b.time||'—'}</td><td>${b.serviceName||'—'}</td><td>${b.price?Number(b.price).toLocaleString():'—'}</td><td><span class="badge">${b.status||'—'}</span></td><td>${b.phone||'—'}</td>`;
+      tbody.appendChild(tr);
+    });
+  };
+
+  R.bookings = function(){
+    const tbody = $('#tblBookings tbody'); tbody.innerHTML='';
+    if(Store.state.bookings.length===0){ tbody.innerHTML = `<tr><td colspan="10"><div class="empty">No bookings available</div></td></tr>`; return; }
+    Store.state.bookings.slice().sort((a,b)=> new Date(b.date)-new Date(a.date)).reverse().forEach(b=>{
+      const tr=document.createElement('tr');
+      const actions = `
+        <button class="btn ghost" data-edit="${b.id}">Edit</button>
+        <button class="btn danger" data-del="${b.id}">Delete</button>
+        <button class="btn" data-rcpt="${b.id}">Receipt</button>`;
+      tr.innerHTML = `<td>${b.id}</td><td>${clampStr(b.client,22)||'—'}</td><td>${b.vehicleReg||'—'}</td><td>${fmtDate(b.date)}</td><td>${b.time||'—'}</td><td>${b.serviceName||'—'}</td><td>${b.price?Number(b.price).toLocaleString():'—'}</td><td>${b.status||'—'}</td><td>${b.phone||'—'}</td><td>${actions}</td>`;
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('[data-edit]').forEach(b=> b.onclick=()=> ui.openEditBooking(b.dataset.edit));
+    tbody.querySelectorAll('[data-del]').forEach(b=> b.onclick=()=> { if(confirm('Delete booking?')) Store.deleteBooking(b.dataset.del); });
+    tbody.querySelectorAll('[data-rcpt]').forEach(b=> b.onclick=()=> openReceipt(b.dataset.rcpt));
+  };
+
+  R.services = function(){
+    const wrap = $('#serviceList'); wrap.innerHTML='';
+    if(Store.state.services.length===0){ wrap.innerHTML = `<div class="empty">No services yet</div>`; return; }
+    const tbl = document.createElement('table'); tbl.className='table';
+    tbl.innerHTML = `<thead><tr><th>Service</th><th>Price (KSh)</th><th>Actions</th></tr></thead><tbody></tbody>`;
+    Store.state.services.forEach(s=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${s.name}</td><td>${Number(s.price).toLocaleString()}</td>
+        <td>
+          <button class="btn ghost" data-edit="${s.id}">Edit</button>
+          <button class="btn danger" data-del="${s.id}">Delete</button>
+        </td>`;
+      tbl.tBodies[0].appendChild(tr);
+    });
+    wrap.appendChild(tbl);
+    wrap.querySelectorAll('[data-edit]').forEach(b=> b.onclick=()=> ui.openEditService(b.dataset.edit));
+    wrap.querySelectorAll('[data-del]').forEach(b=> b.onclick=()=> { if(confirm('Delete service?')) Store.deleteService(b.dataset.del); });
+  };
+
+  R.profile = function(){
+    const p = Store.state.profile;
+    $('#whoami').textContent = p.name || 'Admin';
+    const avatar = $('#avatar'); avatar.innerHTML='';
+    if(p.avatar){ avatar.innerHTML = `<img src="${p.avatar}" alt="Avatar">`; }
+    else { avatar.innerHTML = `<span id="avatarInitials">${(p.name||'BR').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</span>`; }
+    $('#profileBox').innerHTML = `
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="avatar" style="width:66px;height:66px;overflow:hidden">${p.avatar?`<img src="${p.avatar}" alt="Avatar">`:`<span style="font-size:18px;font-weight:800">${(p.name||'BR').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</span>`}</div>
+        <div>
+          <div><strong>${p.name||'—'}</strong></div>
+          <div class="muted">${p.email||'—'}</div>
+          <div class="muted">${p.phone||'—'}</div>
+        </div>
+      </div>`;
+  };
+
+  function refreshAll(){ R.stats(); R.recent(); R.overviewTable(); R.bookings(); R.services(); R.profile(); }
+  Store.sub(refreshAll); refreshAll();
+
+  // ---------- Global buttons ----------
+  $('#btnSignOut').onclick = ()=> showToast({msg:'Logged out (demo)'});
+  $('#qaAddBooking').onclick = ()=> ui.openAddBooking();
+  $('#qaAddService').onclick = ()=> ui.openAddService();
+  $('#qaEditProfile').onclick = ()=> ui.openProfileEdit();
+  $('#qaExportCSV').onclick = exportCSV;
+  $('#bkExportCSV').onclick = exportCSV;
+  $('#bkAdd').onclick = ()=> ui.openAddBooking();
+  $('#srvAdd').onclick = ()=> ui.openAddService();
+  $('#pfEdit').onclick = ()=> ui.openProfileEdit();
+  $('#pfExport').onclick = exportState;
+  $('#pfImport').onclick = importState;
+  $('#qaImportJSON').onclick = importState;
+  $('#qaClearAll').onclick = ()=>{ if(confirm('Clear all data?')){ localStorage.removeItem(LS_KEY); Store.load(); refreshAll(); } };
+
+  // ---------- Search ----------
+  $('#searchBox').addEventListener('input', (e)=>{
+    const q = e.target.value.trim().toLowerCase();
+    if(!q){ R.bookings(); return; }
+    const tbody = $('#tblBookings tbody'); tbody.innerHTML='';
+    const rows = Store.state.bookings.filter(b =>
+      (b.client||'').toLowerCase().includes(q) ||
+      (b.vehicleReg||'').toLowerCase().includes(q) ||
+      (b.phone||'').toLowerCase().includes(q) ||
+      (b.serviceName||'').toLowerCase().includes(q)
+    );
+    if(rows.length===0){ tbody.innerHTML = `<tr><td colspan="10"><div class="empty">No matches</div></td></tr>`; goTo('bookings'); return; }
+    rows.forEach(b=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${b.id}</td><td>${b.client||'—'}</td><td>${b.vehicleReg||'—'}</td><td>${fmtDate(b.date)}</td><td>${b.time||'—'}</td><td>${b.serviceName||'—'}</td><td>${b.price?Number(b.price).toLocaleString():'—'}</td><td>${b.status||'—'}</td><td>${b.phone||'—'}</td><td></td>`;
+      tbody.appendChild(tr);
+    });
+    goTo('bookings');
+  });
+
+  // ---------- Export/Import ----------
+  function exportCSV(){
+    const rows = [['ID','Client','Vehicle','Date','Time','Services','Price','Status','Phone']];
+    Store.state.bookings.forEach(b=>{
+      rows.push([b.id,b.client||'',b.vehicleReg||'',b.date||'',b.time||'',b.serviceName||'',String(b.price||0),b.status||'',b.phone||'']);
+    });
+    const csv = rows.map(r=> r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+    downloadBlob('borauto_bookings.csv', csv, 'text/csv');
+  }
+  function exportState(){ downloadBlob('borauto_export.json', JSON.stringify(Store.state,null,2),'application/json'); }
+  function importState(){
+    const i = document.createElement('input'); i.type='file'; i.accept='application/json';
+    i.onchange = ()=>{ const f=i.files?.[0]; if(!f) return;
+      const reader=new FileReader(); reader.onload = ()=>{
+        try{ const data=JSON.parse(reader.result); Store.replaceState(data); showToast({msg:'Data imported'}); }
+        catch{ alert('Invalid file'); }
+      }; reader.readAsText(f);
+    };
+    i.click();
+  }
+
+  // ---------- UI Forms ----------
+  const ui = {}; window.ui = ui;
+
+  ui.openAddService = function(){
+    const m=openModal({title:'Add Service', content:`
+      <div style="display:grid;gap:8px;margin-top:8px">
+        <input id="sName" placeholder="Service name" autofocus>
+        <input id="sPrice" type="number" min="0" step="50" placeholder="Price (KSh)">
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn ghost" id="c">Cancel</button>
+          <button class="btn" id="ok">Add</button>
+        </div>
+      </div>`});
+    m.el.querySelector('#c').onclick = ()=>m.close();
+    m.el.querySelector('#ok').onclick = ()=>{
+      const name = m.el.querySelector('#sName').value.trim();
+      const price = Number(m.el.querySelector('#sPrice').value||0);
+      if(!name){ alert('Service name required'); return; }
+      Store.addService(name, price);
+      m.close(); showToast({msg:'Service added'}); goTo('services');
+    };
+  };
+
+  ui.openEditService = function(id){
+    const s = Store.state.services.find(x=>x.id===id); if(!s) return;
+    const m=openModal({title:'Edit Service', content:`
+      <div style="display:grid;gap:8px;margin-top:8px">
+        <input id="sName" value="${s.name}">
+        <input id="sPrice" type="number" min="0" step="50" value="${Number(s.price)||0}">
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn danger" id="del">Delete</button>
+          <span style="flex:1"></span>
+          <button class="btn ghost" id="c">Cancel</button>
+          <button class="btn" id="ok">Save</button>
+        </div>
+      </div>`});
+    m.el.querySelector('#c').onclick=()=>m.close();
+    m.el.querySelector('#del').onclick=()=>{ if(confirm('Delete service?')){ Store.deleteService(id); m.close(); }};
+    m.el.querySelector('#ok').onclick=()=>{
+      const name = m.el.querySelector('#sName').value.trim();
+      const price = Number(m.el.querySelector('#sPrice').value||0);
+      if(!name){ alert('Service name required'); return; }
+      Store.updateService(id, {name, price});
+      m.close(); showToast({msg:'Service updated'});
+    };
+  };
+
+  ui.openAddBooking = function(){
+    const opts = Store.state.services.map(s=>`<option value="${s.id}" data-price="${s.price}">${s.name} — KSh ${Number(s.price).toLocaleString()}</option>`).join('');
+    const minDate = todayISO();
+    const m=openModal({title:'Add Booking', content:`
+      <div style="display:grid;gap:8px;margin-top:6px">
+        <input id="bClient" placeholder="Client name">
+        <input id="bPhone" placeholder="Client Phone (+254...)" />
+        <input id="bVehicle" placeholder="Vehicle Reg (e.g. KAA123A)" style="text-transform:uppercase">
+        <label class="muted">Select one or more services (Ctrl/Cmd + Click)</label>
+        <select id="bServices" multiple size="8">${opts}</select>
+        <div style="display:flex;gap:8px">
+          <input id="bDate" type="date" min="${minDate}" style="flex:1">
+          <select id="bTime" style="width:150px"><option>08:00</option><option>10:00</option><option>12:00</option><option>14:00</option><option>16:00</option></select>
+        </div>
+        <input id="bPrice" type="number" min="0" step="50" placeholder="Auto-sum of service prices">
+        <select id="bStatus"><option value="confirmed">confirmed</option><option value="pending">pending</option><option value="completed">completed</option></select>
+        <div class="muted sm">Price auto-fills with sum of selected services; you can override it.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn ghost" id="c">Cancel</button>
+          <button class="btn" id="ok">Save</button>
+        </div>
+      </div>`});
+    const el=m.el;
+    el.querySelector('#bServices').addEventListener('change', ()=>{
+      const sum = Array.from(el.querySelector('#bServices').selectedOptions).reduce((s,o)=> s + Number(o.dataset.price||0), 0);
+      el.querySelector('#bPrice').value = String(sum||0);
+    });
+    el.querySelector('#c').onclick=()=>m.close();
+    el.querySelector('#ok').onclick=()=>{
+      const client = el.querySelector('#bClient').value.trim()||'Guest';
+      const phone  = el.querySelector('#bPhone').value.trim();
+      const vehicleReg = el.querySelector('#bVehicle').value.trim().toUpperCase();
+      const date = el.querySelector('#bDate').value;
+      const time = el.querySelector('#bTime').value;
+      const status = el.querySelector('#bStatus').value;
+      const price = Number(el.querySelector('#bPrice').value||0);
+      const selected = Array.from(el.querySelector('#bServices').selectedOptions).map(o=>({serviceId:o.value, serviceName:o.textContent.split(' — ')[0]}));
+      if(!date){ alert('Date required'); return; }
+      if(isPastDate(date)){ alert('Cannot book for past dates'); return; }
+      if(selected.length===0){ alert('Select at least one service'); return; }
+      if(phone && !/^\+?\d{7,15}$/.test(phone)){ alert('Enter a valid phone number'); return; }
+      const b = Store.addBooking({ client, phone, vehicleReg, date, time, status, services: selected, serviceName: selected.map(s=>s.serviceName).join(', '), price });
+      m.close(); showToast({msg:'Booking added'}); goTo('bookings'); highlightBooking(b.id);
+      Sync.push(Store.state);
+    };
+  };
+
+  ui.openEditBooking = function(id){
+    const b = Store.state.bookings.find(x=>x.id===id); if(!b) return;
+    const opts = Store.state.services.map(s=>`<option value="${s.id}" data-price="${s.price}" ${b.services?.some(x=>x.serviceId===s.id)?'selected':''}>${s.name} — KSh ${Number(s.price).toLocaleString()}</option>`).join('');
+    const m=openModal({title:'Edit Booking', content:`
+      <div style="display:grid;gap:8px;margin-top:6px">
+        <input id="bClient" value="${b.client||''}">
+        <input id="bPhone" value="${b.phone||''}">
+        <input id="bVehicle" value="${b.vehicleReg||''}" style="text-transform:uppercase">
+        <label class="muted">Services</label>
+        <select id="bServices" multiple size="8">${opts}</select>
+        <div style="display:flex;gap:8px">
+          <input id="bDate" type="date" value="${b.date||todayISO()}" min="${todayISO()}" style="flex:1">
+          <select id="bTime" style="width:150px">
+            <option ${b.time==='08:00'?'selected':''}>08:00</option><option ${b.time==='10:00'?'selected':''}>10:00</option>
+            <option ${b.time==='12:00'?'selected':''}>12:00</option><option ${b.time==='14:00'?'selected':''}>14:00</option>
+            <option ${b.time==='16:00'?'selected':''}>16:00</option>
+          </select>
+        </div>
+        <input id="bPrice" type="number" min="0" step="50" value="${Number(b.price||0)}">
+        <select id="bStatus">
+          <option ${b.status==='confirmed'?'selected':''} value="confirmed">confirmed</option>
+          <option ${b.status==='pending'?'selected':''} value="pending">pending</option>
+          <option ${b.status==='completed'?'selected':''} value="completed">completed</option>
+        </select>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn danger" id="del">Delete</button>
+          <span style="flex:1"></span>
+          <button class="btn ghost" id="c">Cancel</button>
+          <button class="btn" id="ok">Save</button>
+        </div>
+      </div>`});
+    const el=m.el;
+    el.querySelector('#bServices').addEventListener('change', ()=>{
+      const sum = Array.from(el.querySelector('#bServices').selectedOptions).reduce((s,o)=> s + Number(o.dataset.price||0), 0);
+      el.querySelector('#bPrice').value = String(sum||0);
+    });
+    el.querySelector('#del').onclick=()=>{ if(confirm('Delete booking?')){ Store.deleteBooking(id); Sync.push(Store.state); m.close(); }};
+    el.querySelector('#c').onclick=()=>m.close();
+    el.querySelector('#ok').onclick=()=>{
+      const client = el.querySelector('#bClient').value.trim()||'Guest';
+      const phone  = el.querySelector('#bPhone').value.trim();
+      const vehicleReg = el.querySelector('#bVehicle').value.trim().toUpperCase();
+      const date = el.querySelector('#bDate').value;
+      const time = el.querySelector('#bTime').value;
+      const status = el.querySelector('#bStatus').value;
+      const price = Number(el.querySelector('#bPrice').value||0);
+      const selected = Array.from(el.querySelector('#bServices').selectedOptions).map(o=>({serviceId:o.value, serviceName:o.textContent.split(' — ')[0]}));
+      if(!date){ alert('Date required'); return; }
+      if(isPastDate(date)){ alert('Cannot set past date'); return; }
+      if(selected.length===0){ alert('Select at least one service'); return; }
+      if(phone && !/^\+?\d{7,15}$/.test(phone)){ alert('Enter a valid phone number'); return; }
+      Store.updateBooking(id, { client, phone, vehicleReg, date, time, status, price, services: selected, serviceName: selected.map(s=>s.serviceName).join(', ') });
+      m.close(); showToast({msg:'Booking updated'}); Sync.push(Store.state);
+    };
+  };
+
+  ui.openProfileEdit = function(){
+    const p = Store.state.profile;
+    const m=openModal({title:'Edit Profile', content:`
+      <div style="display:grid;gap:8px;margin-top:8px;max-width:520px">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="avatar" style="width:66px;height:66px;overflow:hidden">${p.avatar?`<img id="pfPrev" src="${p.avatar}" alt="Avatar">`:`<span id="pfPrevTxt" style="font-weight:800">${(p.name||'BR').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</span>`}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input type="file" id="pfFile" accept="image/*" style="max-width:220px">
+            <button class="btn ghost" id="pfRemove">Remove Photo</button>
+          </div>
+        </div>
+        <input id="pfName" value="${p.name||''}" placeholder="Name">
+        <input id="pfEmail" value="${p.email||''}" placeholder="Email">
+        <input id="pfPhone" value="${p.phone||''}" placeholder="Phone">
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn ghost" id="c">Cancel</button>
+          <button class="btn" id="ok">Save</button>
+        </div>
+      </div>`});
+    const el = m.el;
+    let newAvatar = p.avatar;
+    el.querySelector('#pfFile').addEventListener('change', (ev)=>{
+      const f = ev.target.files?.[0]; if(!f) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{ newAvatar = reader.result; el.querySelector('.avatar').innerHTML = `<img id="pfPrev" src="${newAvatar}" alt="Avatar">`; };
+      reader.readAsDataURL(f);
+    });
+    el.querySelector('#pfRemove').onclick = ()=>{ newAvatar = null; el.querySelector('.avatar').innerHTML = `<span id="pfPrevTxt" style="font-weight:800">${(p.name||'BR').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</span>`; };
+    el.querySelector('#c').onclick=()=>m.close();
+    el.querySelector('#ok').onclick=()=>{
+      Store.updateProfile({
+        name: el.querySelector('#pfName').value.trim()||'Admin',
+        email: el.querySelector('#pfEmail').value.trim()||'',
+        phone: el.querySelector('#pfPhone').value.trim()||'',
+        avatar: newAvatar
+      });
+      m.close(); showToast({msg:'Profile saved'}); Sync.push(Store.state);
+    };
+  };
+
+  // ---------- Receipt modal ----------
+  function openReceipt(id){
+    const b = Store.state.bookings.find(x=>x.id===id); if(!b){ showToast({msg:'Booking not found'}); return; }
+    const content = `
+      <div class="receipt" id="receiptView">
+        <div class="receipt-header">
+          <img src="borauto-logo.png" alt="Borauto Logo">
+          <div><div class="receipt-title">BORAUTO BOOKING RECEIPT</div><div class="receipt-meta">Order ID: ${b.id}</div></div>
+        </div>
+        <div class="receipt-meta"><strong>Client:</strong> ${b.client||'—'} &nbsp; | &nbsp; <strong>Phone:</strong> ${b.phone||'—'}</div>
+        <div class="receipt-meta"><strong>Vehicle:</strong> ${b.vehicleReg||'—'}</div>
+        <div class="receipt-meta"><strong>Date:</strong> ${fmtDate(b.date)} &nbsp; <strong>Time:</strong> ${b.time||'—'}</div>
+        <div class="receipt-meta"><strong>Status:</strong> ${(b.status||'CONFIRMED').toString().toUpperCase()}</div>
+        <div class="receipt-meta"><strong>Total:</strong> KSh ${Number(b.price||0).toLocaleString()}</div>
+        <div class="receipt-services"><strong>Selected Services:</strong><ul style="margin-top:6px">${(b.services?.length?b.services.map(s=>`<li>${s.serviceName}</li>`):[b.serviceName||'—']).join('')}</ul></div>
+        <div style="margin-top:10px;font-size:12px;color:#374151">Note: Diagnosis may be required before final quotation.</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" id="rcptDownloadM">Download PNG</button>
+        <button class="btn ghost" id="rcptPrintM">Print</button>
+        <button class="btn ghost" id="rcptWhatsAppM">WhatsApp</button>
+        <button class="btn ghost" id="rcptEmailM">Email</button>
+        <button class="btn ghost" id="rcptShareM">Share</button>
+      </div>`;
+    const m = openModal({title:`Receipt ${b.id}`, content});
+    const preview = $('#receiptView');
+
+    $('#rcptDownloadM').onclick = async ()=>{
+      const {blob} = await renderReceiptPNG(preview);
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`BORAUTO_${b.id}.png`; a.click(); URL.revokeObjectURL(url);
+    };
+    $('#rcptPrintM').onclick = ()=>{
+      const w=open('','_blank');
+      w.document.write(`<html><head><title>Receipt ${b.id}</title></head><body>${preview.outerHTML}</body></html>`); w.document.close(); w.focus(); w.print(); w.close();
+    };
+    $('#rcptWhatsAppM').onclick = async ()=>{
+      const {file, dataUrl} = await renderReceiptPNG(preview);
+      try{
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          await navigator.share({title:`BORAUTO Receipt ${b.id}`, text:`Receipt ${b.id}`, files:[file]});
+        }
+      }catch{}
+      const msg = encodeURIComponent(`BORAUTO Receipt ${b.id}\nClient: ${b.client||'-'}\nVehicle: ${b.vehicleReg||'-'}\nDate: ${fmtDate(b.date)} ${b.time||''}\nTotal: KSh ${Number(b.price||0).toLocaleString()}`);
+      open(`https://wa.me/${phoneDefault.replace(/^\+/, '')}?text=${msg}`,'_blank');
+      const a=document.createElement('a'); a.href=dataUrl; a.download=`BORAUTO_${b.id}.png`; a.click();
+      showToast({msg:'Image saved—attach in WhatsApp if not auto-shared.'});
+    };
+    $('#rcptEmailM').onclick = async ()=>{
+      const {dataUrl} = await renderReceiptPNG(preview);
+      const base64 = dataUrl.split(',')[1];
+      const subject = `BORAUTO Receipt ${b.id}`;
+      const message = `Please find attached your receipt.\n\nClient: ${b.client||'-'}\nVehicle: ${b.vehicleReg||'-'}\nDate: ${fmtDate(b.date)} ${b.time||''}\nTotal: KSh ${Number(b.price||0).toLocaleString()}`;
+      const to_email = cfg.email_to || 'iconme25@gmail.com';
+      try{
+        if(cfg.emailjs_public && cfg.emailjs_service && cfg.emailjs_template && window.emailjs){
+          try{ emailjs.init(cfg.emailjs_public); }catch(e){}
+          await emailjs.send(cfg.emailjs_service, cfg.emailjs_template, { to_email, subject, message, attachment: base64 });
+          showToast({msg:'Email sent with PNG (EmailJS)'}); return;
+        }
+      }catch(err){ console.error(err); showToast({msg:'EmailJS failed; using mail app'}); }
+      const mailto = `mailto:${encodeURIComponent(to_email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message+'\n\n(If no attachment, the image was downloaded so you can attach it.)')}`;
+      location.href = mailto;
+      const a=document.createElement('a'); a.href=dataUrl; a.download=`BORAUTO_${b.id}.png`; a.click();
+    };
+    $('#rcptShareM').onclick = async ()=>{
+      try{
+        const {file}=await renderReceiptPNG(preview);
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          await navigator.share({title:'BORAUTO Receipt', files:[file]});
+        } else {
+          showToast({msg:'System share not supported'});
+        }
+      }catch{ showToast({msg:'Share failed'}); }
+    };
+  }
+  window.openReceipt = openReceipt;
+
+  async function renderReceiptPNG(node){
+    // Ensure logo is in DOM so it appears in PNG
+    const canvas = await html2canvas(node, {scale:2, backgroundColor:'#ffffff'});
+    const dataUrl = canvas.toDataURL('image/png');
+    const res = await (await fetch(dataUrl)).blob();
+    const file = new File([res], 'receipt.png', {type:'image/png'});
+    return {canvas, dataUrl, blob:res, file};
+  }
+
+  // ---------- Sync form handlers ----------
+  function hydrateSyncForm(){
+    $('#syncMode').value = cfg.syncMode || 'local';
+    $('#fb_apiKey').value = cfg.fb.apiKey || '';
+    $('#fb_authDomain').value = cfg.fb.authDomain || '';
+    $('#fb_projectId').value = cfg.fb.projectId || '';
+    $('#fb_appId').value = cfg.fb.appId || '';
+    $('#fb_room').value = cfg.fb.room || 'borauto-demo';
+    $('#ws_url').value = cfg.ws.url || '';
+    $('#ws_room').value = cfg.ws.room || 'borauto-demo';
+  }
+  $('#syncSave').onclick = async ()=>{
+    cfg.syncMode = $('#syncMode').value;
+    cfg.fb = {
+      apiKey: $('#fb_apiKey').value.trim(),
+      authDomain: $('#fb_authDomain').value.trim(),
+      projectId: $('#fb_projectId').value.trim(),
+      appId: $('#fb_appId').value.trim(),
+      room: $('#fb_room').value.trim() || 'borauto-demo'
+    };
+    cfg.ws = {
+      url: $('#ws_url').value.trim(),
+      room: $('#ws_room').value.trim() || 'borauto-demo'
+    };
+    saveCfg(); await Sync.connect(); showToast({msg:'Sync updated'});
+  };
+  $('#syncDisconnect').onclick = async ()=>{ await Sync.disconnect(); cfg.syncMode='local'; saveCfg(); showToast({msg:'Sync disconnected'}); };
+
+  // ---------- Email settings ----------
+  $('#btnSaveEmailJS').onclick = saveEmailJS;
+
+  // ---------- Ingestion: URL params & postMessage ----------
+  function getParams(){
+    const u=new URL(location.href);
+    const q={}; u.searchParams.forEach((v,k)=> q[k]=v);
+    return q;
+  }
+  function tryIngestFromURL(){
+    const p = getParams();
+    if((p.ingest||'').toLowerCase()!=='booking') return;
+    const servicesArr = (p.services||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const svcObjs = servicesArr.map(n=>({serviceId:'ext-'+uid('srv'), serviceName:n}));
+    const booking = {
+      client: p.client || 'Guest',
+      phone: p.phone || '',
+      vehicleReg: (p.vehicle||'').toUpperCase(),
+      date: p.date || todayISO(),
+      time: p.time || '10:00',
+      status: (p.status||'confirmed'),
+      price: Number(p.price||0),
+      services: svcObjs,
+      serviceName: servicesArr.join(', ')
+    };
+    Store.addBooking(booking);
+    feed('URL ingest → booking added for '+booking.client);
+    const clean = location.pathname + location.hash; history.replaceState({}, '', clean);
+  }
+  window.addEventListener('message', (ev)=>{
+    if(ev.origin !== location.origin) return; // same-origin gate
+    const {type, payload} = ev.data||{};
+    if(type==='BORAUTO_ADD_BOOKING' && payload){
+      const services = (payload.services||[]).map(n=> typeof n==='string' ? {serviceId:'ext-'+uid('srv'), serviceName:n} : n);
+      const booking = {
+        id: payload.id, client: payload.client, phone: payload.phone||'',
+        vehicleReg: (payload.vehicleReg||'').toUpperCase(),
+        date: payload.date, time: payload.time||'10:00', status: (payload.status||'confirmed'),
+        price: Number(payload.price||0), services, serviceName: services.map(s=>s.serviceName).join(', ')
+      };
+      Store.addBooking(booking);
+      feed('postMessage ingest → booking added for '+(booking.client||'Guest'));
+    }
+  });
+
+  // ---------- Live feed ----------
+  function feed(text){
+    const wrap = $('#feed'); if(!wrap) return;
+    const item = document.createElement('div');
+    item.className='item';
+    item.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+    wrap.prepend(item);
+  }
+
+  // ---------- Init ----------
+  tryIngestFromURL();
+  hydrateSyncForm();
+  if(cfg.syncMode!=='local'){ Sync.connect(); }
+
+  // Hint tooltipa
+  $('#statRevenue').setAttribute('title','Double-click to show/hide');
+
+  // ---------- Keyboard focus outlines only when tabbing ----------
+  let hadKeyboardEvent=false;
+  document.addEventListener('keydown',e=>{ if(e.key==='Tab') hadKeyboardEvent=true; },true);
+  document.addEventListener('mousedown',()=> hadKeyboardEvent=false, true);
+  document.addEventListener('focus',e=>{ if(hadKeyboardEvent) document.body.classList.add('kbd'); }, true);
+  document.addEventListener('blur',()=> document.body.classList.remove('kbd'), true);
+})(); // IIFE end
+</script>
+</body>
+</html>

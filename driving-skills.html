@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Driving Skills - Borauto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .header {
+      background-color: #7b001c;
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 36px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .section {
+      display: flex;
+      flex-wrap: wrap;
+      background: #fff;
+      padding: 30px;
+      margin-bottom: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .section img {
+      width: 100%;
+      max-width: 48%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .section .content {
+      flex: 1;
+      padding-left: 20px;
+    }
+
+    .section h2 {
+      color: #d00027;
+      margin-top: 0;
+    }
+
+    .section ul {
+      padding-left: 20px;
+    }
+
+    .section ul li {
+      margin-bottom: 10px;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin: 20px 10px 40px 0;
+      padding: 10px 20px;
+      background-color: #7b001c;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #a8002d;
+    }
+
+    .up-float-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: black;
+      color: yellow;
+      font-size: 24px;
+      padding: 10px 15px;
+      border-radius: 50%;
+      text-align: center;
+      cursor: pointer;
+      z-index: 1000;
+      text-decoration: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .up-float-btn:hover {
+      background-color: #222;
+    }
+
+    @media (max-width: 768px) {
+      .section {
+        flex-direction: column;
+      }
+
+      .section img {
+        max-width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .section .content {
+        padding-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Driving Skills & Road Safety</h1>
+  </div>
+
+  <div class="container">
+
+    <div class="section">
+      <img src="images/driving-basics.jpg" alt="Basic Driving Skills">
+      <div class="content">
+        <h2>Basic Driving Skills</h2>
+        <ul>
+          <li>Understanding controls: steering, acceleration, braking, clutch (manual cars).</li>
+          <li>Starting, stopping and reversing safely.</li>
+          <li>Using mirrors effectively and consistently.</li>
+          <li>Lane discipline and signal usage.</li>
+          <li>Defensive driving awareness.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/road-safety.jpg" alt="Road Safety Tips">
+      <div class="content">
+        <h2>Road Safety Tips</h2>
+        <ul>
+          <li>Always wear seatbelts.</li>
+          <li>Follow speed limits and adapt to road conditions.</li>
+          <li>Avoid phone use and distractions while driving.</li>
+          <li>Use headlights in poor visibility.</li>
+          <li>Be extra cautious in school zones and residential areas.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/defensive-driving.jpg" alt="Defensive Driving">
+      <div class="content">
+        <h2>Defensive Driving</h2>
+        <ul>
+          <li>Anticipate other drivers’ actions.</li>
+          <li>Keep safe following distances.</li>
+          <li>Be prepared for unexpected actions by others.</li>
+          <li>Stay calm in traffic — avoid road rage.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/emergency-response.jpg" alt="Emergency Handling">
+      <div class="content">
+        <h2>Handling Emergencies</h2>
+        <ul>
+          <li>Know how to react to tire bursts, brake failure or skidding.</li>
+          <li>Use hazard lights to warn other drivers.</li>
+          <li>Pull over safely if the car shows warning signs.</li>
+          <li>Call for roadside help or emergency services when necessary.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/parking-techniques.jpg" alt="Parking Techniques">
+      <div class="content">
+        <h2>Parking Techniques</h2>
+        <ul>
+          <li>Master parallel parking and reverse parking.</li>
+          <li>Always use parking brakes when parked.</li>
+          <li>Check surroundings before exiting the vehicle.</li>
+          <li>Do not block driveways, walkways or emergency exits.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <img src="images/night-driving.jpg" alt="Night & Weather Conditions">
+      <div class="content">
+        <h2>Driving in Poor Conditions</h2>
+        <ul>
+          <li>Use fog lights and reduce speed in fog or heavy rain.</li>
+          <li>Keep windshields clean for clear visibility.</li>
+          <li>Increase distance between vehicles during rain or darkness.</li>
+          <li>Slow down during sharp turns or when visibility drops.</li>
+        </ul>
+      </div>
+    </div>
+
+    <a href="knowledge.html" class="back-btn">← Back to Knowledge</a>
+    <a href="index.html" class="back-btn">Home</a>
+
+    <a href="#" class="up-float-btn" title="Go to Top">&#x25B2;</a>
+
+  </div>
+
+</body>
+</html>

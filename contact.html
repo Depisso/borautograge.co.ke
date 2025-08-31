@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Borauto Garage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+        header {
+            background-color: #006633;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        header img {
+            height: 50px;
+            margin-right: 15px;
+        }
+        header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+        nav {
+            margin-left: auto;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 1rem;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .contact-section {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #006633;
+            color: white;
+        }
+        .contact-section h2 {
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 30px auto;
+            max-width: 1100px;
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+            flex: 1 1 220px;
+            max-width: 250px;
+            text-align: center;
+        }
+        .card-icon {
+            font-size: 2rem;
+            color: #006633;
+        }
+        .card h3 {
+            margin-top: 10px;
+            color: #006633;
+        }
+        .card p, .card a {
+            color: #333;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .card a:hover {
+            text-decoration: underline;
+            color: #008000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <img src="borauto-logo.png" alt="Borauto Garage Logo">
+        <h1>Borauto Garage</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="aboutus.html">About Us</a>
+            <a href="services.html">Services</a>
+            <a href="contactus.html">Contact Us</a>
+        </nav>
+    </header>
+
+    <!-- CONTACT SECTION -->
+    <div class="contact-section">
+        <h2>Contact Us</h2>
+        <p>We'd love to hear from you. Our friendly team is always here to help.</p>
+    </div>
+<!-- Floating Accessibility Tools -->
+<style>
+    .accessibility-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #FFD700;
+        color: black;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        z-index: 9999;
+    }
+    .accessibility-panel {
+        position: fixed;
+        bottom: 70px;
+        right: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        width: 220px;
+        display: none;
+        z-index: 10000;
+        overflow: hidden;
+    }
+    .accessibility-panel header {
+        background: #FFD700;
+        color: black;
+        padding: 10px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .accessibility-panel ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .accessibility-panel li {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .accessibility-panel li:hover {
+        background: #f2f2f2;
+    }
+</style>
+
+<button class="accessibility-btn" onclick="togglePanel()">♿</button>
+
+<div class="accessibility-panel" id="accessPanel">
+    <header>
+        Accessibility Tools
+        <span style="cursor:pointer;" onclick="togglePanel()">✖</span>
+    </header>
+    <ul>
+        <li onclick="changeTextSize(1)">🔍 Increase Text</li>
+        <li onclick="changeTextSize(-1)">🔎 Decrease Text</li>
+        <li onclick="toggleClass('grayscale')">⚫ Grayscale</li>
+        <li onclick="toggleClass('high-contrast')">🌓 High Contrast</li>
+        <li onclick="toggleClass('negative-contrast')">🌒 Negative Contrast</li>
+        <li onclick="toggleClass('light-bg')">💡 Light Background</li>
+        <li onclick="toggleClass('underline-links')">🔗 Links Underline</li>
+        <li onclick="toggleClass('readable-font')">🅰 Readable Font</li>
+        <li onclick="alert('Screen Reader Activated')">🔊 Screen Reader</li>
+        <li onclick="alert('Voice Reader Activated')">📢 Voice Reader</li>
+        <li onclick="resetAccessibility()">↩ Reset</li>
+    </ul>
+</div>
+
+<script>
+    let fontSize = 16;
+
+    function togglePanel() {
+        const panel = document.getElementById('accessPanel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function changeTextSize(amount) {
+        fontSize += amount;
+        document.body.style.fontSize = fontSize + 'px';
+    }
+
+    function toggleClass(className) {
+        document.body.classList.toggle(className);
+    }
+
+    function resetAccessibility() {
+        document.body.className = '';
+        document.body.style.fontSize = '';
+        fontSize = 16;
+    }
+</script>
+
+<style>
+    /* Accessibility Modes */
+    .grayscale { filter: grayscale(100%); }
+    .high-contrast { filter: contrast(200%); }
+    .negative-contrast { filter: invert(100%); }
+    .light-bg { background-color: white !important; color: black !important; }
+    .underline-links a { text-decoration: underline !important; }
+    .readable-font { font-family: Arial, sans-serif !important; letter-spacing: 1px; }
+</style>
+
+    <!-- CONTACT CARDS -->
+    <div class="container">
+        <div class="card">
+            <div class="card-icon">📧</div>
+            <h3>Email Us</h3>
+            <p>Main Email: <a href="mailto:borauto@gmail.com">borauto@gmail.com</a></p>
+            <p>Support: <a href="mailto:borautohelp@gmail.com">borautohelp@gmail.com</a></p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">📞</div>
+            <h3>Call Us</h3>
+            <p>Main: <a href="tel:+254722738797">0722 738 797</a></p>
+            <p>Support: <a href="tel:+254713064230">+254 713 064 230</a></p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">📍</div>
+            <h3>Visit Us</h3>
+            <p><a href="https://maps.app.goo.gl/ncndM3PyA1HTwPZN8" target="_blank">
+                Kariokor, near WW2 Cemetery<br>Nairobi, Kenya
+            </a></p>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">✉️</div>
+            <h3>Write to Us</h3>
+            <p>Borauto Garage<br>
+            P.O. Box 12345 - 00100<br>
+            Nairobi, Kenya</p>
+        </div>
+    </div>
+
+</body>
+</html>

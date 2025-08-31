@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Knowledge Centre - Borauto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    .header {
+      text-align: center;
+      padding: 40px 20px 10px;
+    }
+
+    .header h1 {
+      color: #7b001c;
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      width: 280px;
+      transition: transform 0.3s ease;
+      text-align: center;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card h3 {
+      color: #d00027;
+      font-size: 20px;
+      margin: 20px 0 10px;
+    }
+
+    .card button {
+      background-color: #7b001c;
+      color: #fff;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .card button:hover {
+      background-color: #a8002d;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+     
+     <h1>Knowledge Centre - Borauto</h1>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <img src="images/know-your-car.jpg" alt="Know Your Car">
+      <h3>KNOW YOUR CAR</h3>
+      <button onclick="location.href='know-your-car.html'">Explore</button>
+    </div>
+
+    <div class="card">
+      <img src="images/driving-skills.jpg" alt="Driving Skills">
+      <h3>DRIVING SKILLS</h3>
+      <button onclick="location.href='driving-skills.html'">Explore</button>
+    </div>
+
+    <div class="card">
+      <img src="images/car-maintenance.jpg" alt="Car Maintenance">
+      <h3>CAR MAINTENANCE</h3>
+      <button onclick="location.href='car-maintenance.html'">Explore</button>
+    </div>
+
+    <div class="card">
+      <img src="images/products-brands.jpg" alt="Products Brands">
+      <h3>PRODUCTS BRANDS</h3>
+      <button onclick="location.href='products-brands.html'">Explore</button>
+    </div>
+  </div>
+<a href="index.html" class="back-btn" style="margin-left: 10px;">  Home</a>
+
+</body>
+</html>
